@@ -1,15 +1,7 @@
 module Combinations where
 
 import Data.List (group, groupBy, sort, sortBy)
-import Control.Applicative (liftA2, (<*>))
-
-
-combine :: [[a]] -> [[a]]
-combine = foldr (liftA2 (:)) [[]] -- (\lst acc -> (:) <$> lst <*> acc)
-
-combinations :: [[a]] -> [[[a]]]
-combinations = scanl (flip $ liftA2 (:)) [[]] -- makes right side up simpleces
-
+import Control.Applicative (Applicative, pure, liftA2)
 
 collectPermutations :: Ord b => ([a] -> b) -> [[a]] -> [[b]]
 collectPermutations = ((group . sort) .) . map

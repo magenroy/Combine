@@ -3,12 +3,10 @@ module Main (main) where
 import System.Environment (getArgs)
 import Control.Monad ((>=>))
 
-import Combinations (combinations, slice, groupPermutations)
-import Combine (combineR)
+import ListCombine (listCombine, slice, groupPermutations)
 
--- make structure generator
---  requires finding way to properly group the strings
 
+options :: [(String, [String] -> IO ())]
 options =
     ("s", lcomb):("-strings", lcomb):
     ("t", lslice):("-terms", lslice):
@@ -26,13 +24,11 @@ help = "Finds all combinations of elements in a list of lists"
     ++ "\n\t -t --terms \t count like strings resulting from combining arguments (strings are compared based on the sum of the numerical representations of their characters)"
     ++ "\n\t -g --group \t group like terms"
 
-comb = combineR (:) []
-
 fcomb :: String -> IO ()
-fcomb = putStr . unlines . map unwords . comb . map words . lines
+fcomb = putStr . unlines . map unwords . listCombine . map words . lines
 
 lcomb :: [String] -> IO ()
-lcomb = putStrLn . unwords . comb
+lcomb = putStrLn . unwords . listCombine
 
 enumSum :: Enum a => [a] -> Int
 enumSum = sum . map fromEnum
@@ -40,7 +36,11 @@ enumSum = sum . map fromEnum
 lslice :: Enum a => [[a]] -> IO ()
 lslice = putStrLn . unwords . map show . (slice enumSum)
 
-lgroup = putStr . unlines . map (unwords) . fst . unzip . map unzip . groupPermutations enumSum . comb -- should indicate how many elements on each line
+lgroup :: [String] -> IO ()
+lgroup = putStr .
+    unlines . map (\l -> (show $ length l) ++ "\t" ++ unwords l) . -- format
+    fst . unzip . map unzip . -- extract
+    groupPermutations enumSum . listCombine -- generate
 
 combIO :: [String] -> IO ()
 combIO [] = getContents >>= fcomb

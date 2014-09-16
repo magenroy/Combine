@@ -1,10 +1,12 @@
-module Combinations where
+module ListCombine where
 
 import Data.List (group, groupBy, sort, sortBy)
 import Control.Applicative (Applicative, pure, liftA2)
 
-collectPermutations :: Ord b => ([a] -> b) -> [[a]] -> [[b]]
-collectPermutations = ((group . sort) .) . map
+import Combine(combineR, combinationsL)
+
+listCombine = combineR (:) []
+listCombinations = combinationsL (flip (:)) []
 
 groupPermutations :: Ord b => (a -> b) -> [a] -> [[(a, b)]]
 groupPermutations f = let check a b = (snd a == snd b, compare (snd a) (snd b)) in
@@ -13,12 +15,10 @@ groupPermutations f = let check a b = (snd a == snd b, compare (snd a) (snd b)) 
     map (\x -> (x, f x))
 
 likeTerms :: Ord b => ([a] -> b) -> [[a]] -> [Int]
-likeTerms = (map length .) . collectPermutations
-likeTerms' f = (map length .) . groupPermutations $ f -- why is this so much slower? (are fst and snd really that slow?)
+likeTerms = ((map length . group . sort) .) . map
 
 slice :: Ord b => ([a] -> b) -> [[a]] -> [Int]
-slice f = likeTerms f . combine
+slice f = likeTerms f . listCombine
 
 struct :: Ord b => ([a] -> b) -> [[a]] -> [[Int]]
-struct f = map (likeTerms f) . combinations
-struct' f = map (likeTerms' f) . combinations
+struct f = map (likeTerms f) . listCombinations
